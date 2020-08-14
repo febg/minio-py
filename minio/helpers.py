@@ -349,7 +349,7 @@ def is_virtual_host(endpoint_url, bucket_name):
     :param endpoint_url: Endpoint url which will be used for virtual host.
     :param bucket_name: Bucket name to be validated against.
     """
-    check_bucket_name(bucket_name)
+    is_valid_bucket_name(bucket_name, False)
 
     parsed_url = urlsplit(endpoint_url)
     # bucket_name can be valid but '.' in the hostname will fail
@@ -362,9 +362,16 @@ def is_virtual_host(endpoint_url, bucket_name):
         's3-accelerate.amazonaws.com', 's3.amazonaws.com', 'aliyuncs.com'])
 
 
-def check_bucket_name(bucket_name, strict=False):
-    """Check whether bucket name is valid optional with strict check or not."""
+def is_valid_bucket_name(bucket_name, strict):
+    """
+    Check to see if the ``bucket_name`` complies with the
+    restricted DNS naming conventions necessary to allow
+    access via virtual-hosting style.
 
+    :param bucket_name: Bucket name in *str*.
+    :return: True if the bucket is valid. Raise :exc:`InvalidBucketError`
+       otherwise.
+    """
     # Verify bucket name is not empty
     bucket_name = str(bucket_name).strip()
     if not bucket_name:
@@ -398,15 +405,24 @@ def check_bucket_name(bucket_name, strict=False):
     if (not match) or match.end() != len(bucket_name):
         raise InvalidBucketError('Bucket name does not follow S3 standards.'
                                  ' Bucket: {0}'.format(bucket_name))
+    return True
 
 
-def check_non_empty_string(string):
-    """Check whether given string is not empty."""
+def is_non_empty_string(input_string):
+    """
+    Validate if non empty string
+
+    :param input_string: Input is a *str*.
+    :return: True if input is string and non empty.
+       Raise :exc:`Exception` otherwise.
+    """
     try:
-        if not string.strip():
+        if not input_string.strip():
             raise ValueError()
-    except AttributeError as exc:
-        raise TypeError(exc)
+    except AttributeError as error:
+        raise TypeError(error)
+
+    return True
 
 
 def is_valid_policy_type(policy):
@@ -421,7 +437,7 @@ def is_valid_policy_type(policy):
     if not isinstance(policy, string_type):
         raise TypeError('policy can only be of type str')
 
-    check_non_empty_string(policy)
+    is_non_empty_string(policy)
 
     return True
 
@@ -550,16 +566,26 @@ def is_valid_notification_config(config):
     return True
 
 
-def check_ssec(sse):
-    """Check sse is SseCustomerKey type or not."""
+def is_valid_sse_c_object(sse):
+    """
+    Validate the SSE object and type
+
+    :param sse: SSE object defined.
+    """
     if sse and not isinstance(sse, SseCustomerKey):
-        raise InvalidArgumentError("SseCustomerKey type is required")
+        raise InvalidArgumentError(
+            "Required type SSE-C object to be passed")
 
 
-def check_sse(sse):
-    """Check sse is Sse type or not."""
+def is_valid_sse_object(sse):
+    """
+    Validate the SSE object and type
+
+    :param sse: SSE object defined.
+    """
     if sse and not isinstance(sse, Sse):
-        raise InvalidArgumentError("Sse type is required")
+        raise InvalidArgumentError(
+            "unsuported type of sse argument in put_object")
 
 
 def encode_object_name(object_name):
@@ -569,7 +595,7 @@ def encode_object_name(object_name):
     :param object_name: Un-encoded object name.
     :return: URL encoded input object name.
     """
-    check_non_empty_string(object_name)
+    is_non_empty_string(object_name)
     return quote(object_name)
 
 

@@ -28,10 +28,8 @@ This module contains the simple wrappers for XML marshaller's.
 from __future__ import absolute_import
 
 import io
+import xml.etree.ElementTree as ET
 from collections import defaultdict
-from xml.etree import ElementTree as ET
-
-from .compat import basestring
 
 _S3_NAMESPACE = 'http://s3.amazonaws.com/doc/2006-03-01/'
 
@@ -384,7 +382,7 @@ def _add_notification_config_to_xml(node, element_name, configs):
     return node
 
 
-def xml_marshal_delete_objects(keys):
+def xml_marshal_delete_objects(object_names):
     """
     Marshal Multi-Object Delete request body from object names.
 
@@ -399,15 +397,7 @@ def xml_marshal_delete_objects(keys):
     SubElement(root, 'Quiet', "true")
 
     # add each object to the request.
-    for key in keys:
-        version_id = None
-        if not isinstance(key, basestring):
-            version_id = key[1]
-            key = key[0]
-
-        element = SubElement(root, "Object")
-        SubElement(element, "Key", key)
-        if version_id:
-            SubElement(element, "VersionId", version_id)
+    for object_name in object_names:
+        SubElement(SubElement(root, 'Object'), 'Key', object_name)
 
     return _get_xml_data(root)
