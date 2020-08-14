@@ -26,7 +26,7 @@ in parallel. Tasks results can also be retrieved.
 
 """
 
-from threading import BoundedSemaphore, Thread
+from threading import Thread, BoundedSemaphore
 
 from .compat import PYTHON2
 

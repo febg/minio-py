@@ -24,8 +24,9 @@ This module implements a progress printer while communicating with MinIO server
 
 import sys
 import time
-from queue import Empty, Queue
 from threading import Thread
+
+from minio.compat import queue, queue_empty
 
 _BAR_SIZE = 20
 _KILOBYTE = 1024
@@ -66,7 +67,7 @@ class Progress(Thread):
         self.last_printed_len = 0
         self.current_size = 0
 
-        self.display_queue = Queue()
+        self.display_queue = queue()
         self.initial_time = time.time()
         self.stdout = stdout
         self.start()
@@ -88,7 +89,7 @@ class Progress(Thread):
             try:
                 # display every interval secs
                 task = self.display_queue.get(timeout=self.interval)
-            except Empty:
+            except queue_empty:
                 elapsed_time = time.time() - self.initial_time
                 if elapsed_time > displayed_time:
                     displayed_time = elapsed_time

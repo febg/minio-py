@@ -38,13 +38,9 @@ class Sse:
     def headers(self):
         """Return headers."""
 
-    def tls_required(self):  # pylint: disable=no-self-use
-        """Return TLS required to use this server-side encryption."""
-        return True
-
     def copy_headers(self):  # pylint: disable=no-self-use
         """Return copy headers."""
-        return {}
+        raise TypeError("method unsupported")
 
 
 class SseCustomerKey(Sse):
@@ -104,6 +100,3 @@ class SseS3(Sse):
         return {
             "X-Amz-Server-Side-Encryption": "AES256"
         }
-
-    def tls_required(self):
-        return False
